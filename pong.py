@@ -36,6 +36,7 @@ class Game:
         #ball starts off going either left or right, randomly
         self.ball.dx = constants.BALL_SPEED * random.choice((-1,1))
         self.ball.dy = constants.BALL_SPEED * random.choice((-1,1))
+        self.score = [0,0]
     
     def reset_ball(self):
         self.ball.dx = constants.BALL_SPEED * random.choice((-1,1))
@@ -45,7 +46,6 @@ class Game:
     def main_loop(self):
         while self.loop:
             #accept input
-            #update game
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.loop = False
@@ -64,8 +64,8 @@ class Game:
                         else:
                             self.player_paddle.y = constants.GAME_WINDOW_HEIGHT - constants.PADDLE_HEIGHT
             
-            
-            #ball logic
+        #update game   
+        #ball logic
             #ball movement
             self.ball.x += self.ball.dx
             self.ball.y += self.ball.dy
@@ -73,11 +73,13 @@ class Game:
             #ball collision
         
             
-            #draw game
+        #draw game
             self.gameDisplay.fill((0,0,0))
             #draw the midline
             renderer.render_object(renderer.surfaces.midline, (constants.GAME_WINDOW_WIDTH/2 - constants.MIDLINE_WIDTH/2, 0))
-            
+            #draw the score
+            renderer.render_object(renderer.surfaces.left_score, (constants.SCORE_X_L, constants.SCORE_Y))
+            renderer.render_object(renderer.surfaces.right_score, (constants.SCORE_X_R, constants.SCORE_Y))
             #draw the player
             renderer.render_object(renderer.surfaces.player_paddle, (self.player_paddle.x, self.player_paddle.y))
             #draw the ai

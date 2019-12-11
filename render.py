@@ -3,11 +3,12 @@ import pygame,constants
 class GameSurfaces:
     def __init__(self):
         self.font = pygame.font.SysFont(constants.GAME_FONT, constants.GAME_FONT_SIZE)
+        self.score_font = pygame.font.SysFont(constants.GAME_FONT, constants.SCORE_FONT_SIZE)
         self.ball = self.create_ball()
         self.player_paddle = self.create_paddle()
         self.ai_paddle = self.create_paddle()
-        self.left_score = self.create_score("")
-        self.right_score = self.create_score("")
+        self.left_score = self.create_score(0)
+        self.right_score = self.create_score(0)
         self.midline = self.create_midline()
         
     def create_ball(self):
@@ -21,7 +22,8 @@ class GameSurfaces:
         return paddle
     
     def create_score(self, score):
-        score_surface = self.font.render(score, True, (255,255,255))
+        score_string = str(score)
+        score_surface = self.score_font.render(score_string, False, (100,100,100))
         return score_surface
         
     
