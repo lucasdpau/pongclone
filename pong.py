@@ -75,6 +75,9 @@ class Game:
             
             #draw game
             self.gameDisplay.fill((0,0,0))
+            #draw the midline
+            renderer.render_object(renderer.surfaces.midline, (constants.GAME_WINDOW_WIDTH/2 - constants.MIDLINE_WIDTH/2, 0))
+            
             #draw the player
             renderer.render_object(renderer.surfaces.player_paddle, (self.player_paddle.x, self.player_paddle.y))
             #draw the ai

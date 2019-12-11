@@ -8,6 +8,7 @@ class GameSurfaces:
         self.ai_paddle = self.create_paddle()
         self.left_score = self.create_score("")
         self.right_score = self.create_score("")
+        self.midline = self.create_midline()
         
     def create_ball(self):
         ball = pygame.Surface((constants.BALL_WIDTH, constants.BALL_HEIGHT))
@@ -25,8 +26,8 @@ class GameSurfaces:
         
     
     def create_midline(self):
-        midline = pygame.Surface((5, constants.GAME_WINDOW_HEIGHT))
-        midline.fill((255, 255, 255))
+        midline = pygame.Surface((constants.MIDLINE_WIDTH, constants.GAME_WINDOW_HEIGHT))
+        midline.fill((200, 200, 200))
         return midline
 
 class Renderer:
