@@ -32,16 +32,21 @@ class Game:
         pygame.key.set_repeat(int(1000/self.tick))
         self.player_paddle = Entity("player", 50, constants.GAME_WINDOW_HEIGHT/2)
         self.ai_paddle = Entity("ai", constants.GAME_WINDOW_WIDTH - 50, constants.GAME_WINDOW_HEIGHT/2)
-        self.ball = Entity("ball", constants.GAME_WINDOW_WIDTH/2, constants.GAME_WINDOW_WIDTH/2)
+        self.ball = Entity("ball", constants.GAME_WINDOW_WIDTH/2, constants.GAME_WINDOW_HEIGHT/2)
         #ball starts off going either left or right, randomly
-        self.ball.dx = constants.BALL_SPEED * random.choice((-1,1))
-        self.ball.dy = constants.BALL_SPEED * random.choice((-1,1))
+        self.reset_ball()
         self.score = [0,0]
     
     def reset_ball(self):
+        self.ball.x = constants.GAME_WINDOW_WIDTH/2
+        self.ball.y = constants.GAME_WINDOW_HEIGHT/2
         self.ball.dx = constants.BALL_SPEED * random.choice((-1,1))
         self.ball.dy = constants.BALL_SPEED * random.choice((-1,1))
-        pass
+        
+    def update_score(self, scorer):
+        self.score[scorer] += 1
+        renderer.surfaces.left_score = renderer.surfaces.create_score(self.score[0])
+        renderer.surfaces.right_score = renderer.surfaces.create_score(self.score[1])
     
     def main_loop(self):
         while self.loop:
@@ -71,7 +76,31 @@ class Game:
             self.ball.y += self.ball.dy
             
             #ball collision
-        
+            #wall collision
+            if self.ball.y <= 0:
+                self.ball.dy *= -1
+            elif self.ball.y >= constants.GAME_WINDOW_HEIGHT:
+                self.ball.dy *= -1
+            
+            #paddle collision
+            if self.ball.dx < 0:
+                #ball encounters player paddle x coordinate
+                if self.ball.x <= self.player_paddle.x:
+                    if (self.ball.y + constants.BALL_HEIGHT) > self.player_paddle.y and self.ball.y < (self.player_paddle.y + constants.PADDLE_HEIGHT):
+                        self.ball.dx *= -1
+                        self.ball.dy *= -1
+                    else:
+                        self.reset_ball()
+                        self.update_score(1)
+            else:
+                #ball encounters ai paddle x coordinate
+                if (self.ball.x + constants.BALL_WIDTH) >= (self.ai_paddle.x + constants.PADDLE_WIDTH):
+                    if (self.ball.y + constants.BALL_HEIGHT) > self.ai_paddle.y and self.ball.y < (self.ai_paddle.y + constants.PADDLE_HEIGHT):
+                        self.ball.dx *= -1
+                        self.ball.dy *= -1
+                    else:
+                        self.reset_ball()
+                        self.update_score(0)
             
         #draw game
             self.gameDisplay.fill((0,0,0))
