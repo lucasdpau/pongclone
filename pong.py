@@ -100,11 +100,8 @@ class Game:
                 self.ball.x += self.ball.dx
                 self.ball.y += self.ball.dy
                 
-                #ball collision
                 #wall collision
-                if self.ball.y <= 0:
-                    self.ball.dy *= -1
-                elif self.ball.y >= constants.GAME_WINDOW_HEIGHT:
+                if self.ball.y <= 0 or self.ball.y >= constants.GAME_WINDOW_HEIGHT:
                     self.ball.dy *= -1
                 
                 #paddle collision
@@ -129,6 +126,7 @@ class Game:
                             self.increment_score(0)
                             self.check_winner()
                 
+                #if there's a winner, go back to main menu and reset score for the next game.
                 if not self.winner == None:
                     if self.winner == "player":
                         self.game_state = "MENU"
