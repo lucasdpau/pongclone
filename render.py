@@ -10,6 +10,7 @@ class GameSurfaces:
         self.left_score = self.create_score(0)
         self.right_score = self.create_score(0)
         self.midline = self.create_midline()
+        self.main_menu = self.create_main_menu()
         
     def create_ball(self):
         ball = pygame.Surface((constants.BALL_WIDTH, constants.BALL_HEIGHT))
@@ -31,6 +32,14 @@ class GameSurfaces:
         midline = pygame.Surface((constants.MIDLINE_WIDTH, constants.GAME_WINDOW_HEIGHT))
         midline.fill((200, 200, 200))
         return midline
+    
+    def create_main_menu(self):
+        menu_surface = pygame.Surface((constants.GAME_WINDOW_WIDTH, constants.GAME_WINDOW_HEIGHT))
+        menu_prompt = self.font.render("Press SPACE or ENTER to start! ESC to leave.", True, (255, 255 ,255))
+        
+        menu_surface.blit(menu_prompt, (200, constants.GAME_WINDOW_HEIGHT/2))
+        
+        return menu_surface
 
 class Renderer:
     def __init__(self, main_surface):
