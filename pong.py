@@ -37,16 +37,18 @@ class Game:
         self.player_paddle = Entity("player", 50, constants.GAME_WINDOW_HEIGHT/2)
         self.ai_paddle = Entity("ai", constants.GAME_WINDOW_WIDTH - 50, constants.GAME_WINDOW_HEIGHT/2)
         self.ball = Entity("ball", constants.GAME_WINDOW_WIDTH/2, constants.GAME_WINDOW_HEIGHT/2)
+        self.ball_speed = constants.BALL_SPEED
         #ball starts off going either left or right, randomly
         self.reset_ball()
         self.score = [0,0]
         self.winner = None
     
     def reset_ball(self):
+        self.ball_speed = constants.BALL_SPEED
         self.ball.x = constants.GAME_WINDOW_WIDTH/2
         self.ball.y = constants.GAME_WINDOW_HEIGHT/2
-        self.ball.dx = int(math.cos(math.radians(45)) * (constants.BALL_SPEED * random.choice((-1,1))))
-        self.ball.dy = int(math.sin(math.radians(45)) * (constants.BALL_SPEED * random.choice((-1,1))))
+        self.ball.dx = int(math.cos(math.radians(45)) * (self.ball_speed * random.choice((-1,1))))
+        self.ball.dy = int(math.sin(math.radians(45)) * (self.ball_speed * random.choice((-1,1))))
     
     def ball_collision(self, paddle):
         #if the ball hits the 'middle'  it bounces straight. closer to the edge = bigger angle. if it hits the 'edge', it bounces at max angle of 70.
@@ -55,13 +57,14 @@ class Game:
         distance_from_center = int(ball_center - paddle_center)
         angle_to_bounce = int((distance_from_center/(constants.PADDLE_HEIGHT/2 + constants.BALL_HEIGHT/2)) * 70)
         angle_in_rads = math.radians(angle_to_bounce)
-
+        #increase ball speed a tiny bit each bounce
+        self.ball_speed += 0.1
         #check which way to send the ball, based on its speed before collision
         if self.ball.dx > 0:
-            self.ball.dx = int(-1 * math.cos(angle_in_rads) * constants.BALL_SPEED) 
+            self.ball.dx = int(-1 * math.cos(angle_in_rads) * self.ball_speed) 
         else:
-            self.ball.dx = int(math.cos(angle_in_rads) * constants.BALL_SPEED)
-        self.ball.dy = int(math.sin(angle_in_rads) * constants.BALL_SPEED)
+            self.ball.dx = int(math.cos(angle_in_rads) * self.ball_speed)
+        self.ball.dy = int(math.sin(angle_in_rads) * self.ball_speed)
         
     def update_score(self):
         renderer.surfaces.left_score = renderer.surfaces.create_score(self.score[0])
