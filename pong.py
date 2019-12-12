@@ -1,4 +1,4 @@
-import pygame, constants, render, random
+import pygame, constants, render, random, math
 
 def handle_keys(key):
     if key == pygame.K_UP:
@@ -45,14 +45,23 @@ class Game:
     def reset_ball(self):
         self.ball.x = constants.GAME_WINDOW_WIDTH/2
         self.ball.y = constants.GAME_WINDOW_HEIGHT/2
-        self.ball.dx = constants.BALL_SPEED * random.choice((-1,1))
-        self.ball.dy = constants.BALL_SPEED * random.choice((-1,1))
+        self.ball.dx = int(math.cos(math.radians(45)) * (constants.BALL_SPEED * random.choice((-1,1))))
+        self.ball.dy = int(math.sin(math.radians(45)) * (constants.BALL_SPEED * random.choice((-1,1))))
     
-    def ball_collision(self):
-        #split the paddle into 8 slices. if the ball hits the 'middle' slices it bounces like it hit a mirror. if it hits the 'edge' slices,
-        #it bounces at a more shallow angle.
-        self.ball.dx *= -1
-        self.ball.dy *= -1      
+    def ball_collision(self, paddle):
+        #if the ball hits the 'middle'  it bounces straight. closer to the edge = bigger angle. if it hits the 'edge', it bounces at max angle of 70.
+        ball_center = self.ball.y + constants.BALL_HEIGHT/2
+        paddle_center = paddle.y + constants.PADDLE_HEIGHT/2
+        distance_from_center = int(ball_center - paddle_center)
+        angle_to_bounce = int((distance_from_center/(constants.PADDLE_HEIGHT/2 + constants.BALL_HEIGHT/2)) * 70)
+        angle_in_rads = math.radians(angle_to_bounce)
+
+        #check which way to send the ball, based on its speed before collision
+        if self.ball.dx > 0:
+            self.ball.dx = int(-1 * math.cos(angle_in_rads) * constants.BALL_SPEED) 
+        else:
+            self.ball.dx = int(math.cos(angle_in_rads) * constants.BALL_SPEED)
+        self.ball.dy = int(math.sin(angle_in_rads) * constants.BALL_SPEED)
         
     def update_score(self):
         renderer.surfaces.left_score = renderer.surfaces.create_score(self.score[0])
@@ -113,8 +122,7 @@ class Game:
                 self.paddle_ai()
                 
                 #ball movement
-                self.ball.x += self.ball.dx
-                self.ball.y += self.ball.dy
+                self.ball.move(self.ball.dx, self.ball.dy)
                 
                 #wall collision
                 if self.ball.y <= 0 or self.ball.y >= constants.GAME_WINDOW_HEIGHT:
@@ -124,8 +132,8 @@ class Game:
                 if self.ball.dx < 0:
                     #ball encounters player paddle x coordinate
                     if self.ball.x <= self.player_paddle.x:
-                        if (self.ball.y + constants.BALL_HEIGHT) > self.player_paddle.y and self.ball.y < (self.player_paddle.y + constants.PADDLE_HEIGHT):
-                            self.ball_collision()
+                        if (self.ball.y + constants.BALL_HEIGHT) >= self.player_paddle.y and self.ball.y <= (self.player_paddle.y + constants.PADDLE_HEIGHT):
+                            self.ball_collision(self.player_paddle)
                         else:
                             self.reset_ball()
                             self.increment_score(1)
@@ -133,8 +141,8 @@ class Game:
                 else:
                     #ball encounters ai paddle x coordinate
                     if (self.ball.x + constants.BALL_WIDTH) >= (self.ai_paddle.x + constants.PADDLE_WIDTH):
-                        if (self.ball.y + constants.BALL_HEIGHT) > self.ai_paddle.y and self.ball.y < (self.ai_paddle.y + constants.PADDLE_HEIGHT):
-                            self.ball_collision()
+                        if (self.ball.y + constants.BALL_HEIGHT) >= self.ai_paddle.y and self.ball.y <= (self.ai_paddle.y + constants.PADDLE_HEIGHT):
+                            self.ball_collision(self.ai_paddle)
                         else:
                             self.reset_ball()
                             self.increment_score(0)
