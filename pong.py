@@ -50,6 +50,10 @@ class Game:
         self.ball.dx = int(math.cos(math.radians(45)) * (self.ball_speed * random.choice((-1,1))))
         self.ball.dy = int(math.sin(math.radians(45)) * (self.ball_speed * random.choice((-1,1))))
     
+    def reset_paddles(self):
+        self.player_paddle.y = constants.GAME_WINDOW_HEIGHT/2
+        self.ai_paddle.y = constants.GAME_WINDOW_HEIGHT/2
+    
     def ball_collision(self, paddle):
         #if the ball hits the 'middle'  it bounces straight. closer to the edge = bigger angle. if it hits the 'edge', it bounces at max angle of 70.
         ball_center = self.ball.y + constants.BALL_HEIGHT/2
@@ -58,7 +62,7 @@ class Game:
         angle_to_bounce = int((distance_from_center/(constants.PADDLE_HEIGHT/2 + constants.BALL_HEIGHT/2)) * 70)
         angle_in_rads = math.radians(angle_to_bounce)
         #increase ball speed a tiny bit each bounce
-        self.ball_speed += 0.1
+        self.ball_speed += constants.BALL_BOUNCE_ACCELERATION
         #check which way to send the ball, based on its speed before collision
         if self.ball.dx > 0:
             self.ball.dx = int(-1 * math.cos(angle_in_rads) * self.ball_speed) 
@@ -81,12 +85,17 @@ class Game:
             self.winner = "ai"
             
     def paddle_ai(self):
-        #ai will constantly try to center the paddle on the ball.
+        #ai will constantly try to center the paddle on the ball. add or subtract constants.BALL_HEIGHT to prevent the ai from "flickering"
         paddle_center = (self.ai_paddle.y + constants.PADDLE_HEIGHT/2)
-        if self.ball.y > paddle_center:
+        if self.ball.y > paddle_center + constants.BALL_HEIGHT/2:
             self.ai_paddle.move(0, constants.PADDLE_SPEED)
-        elif self.ball.y < paddle_center:
+            if self.ai_paddle.y + constants.PADDLE_HEIGHT > constants.GAME_WINDOW_WIDTH:
+                self.ai_paddle.y = constants.GAME_WINDOW_WIDTH - constants.PADDLE_HEIGHT            
+
+        elif self.ball.y < paddle_center - constants.BALL_HEIGHT/2:
             self.ai_paddle.move(0, -constants.PADDLE_SPEED)
+            if self.ai_paddle.y < 0:
+                self.ai_paddle.y = 0            
     
     def main_loop(self):
         while self.loop:
@@ -139,6 +148,7 @@ class Game:
                             self.ball_collision(self.player_paddle)
                         else:
                             self.reset_ball()
+                            self.reset_paddles()
                             self.increment_score(1)
                             self.check_winner()
                 else:
@@ -148,6 +158,7 @@ class Game:
                             self.ball_collision(self.ai_paddle)
                         else:
                             self.reset_ball()
+                            self.reset_paddles()
                             self.increment_score(0)
                             self.check_winner()
                 
