@@ -84,6 +84,14 @@ class Game:
         elif self.score[1] > constants.SCORE_LIMIT:
             self.winner = "ai"
             
+    def win_lose(self):
+        #pops up a screen for 3 seconds
+        counter = 0
+        while counter < 180:
+            counter += 1
+            print("LOSER!")
+            self.clock.tick(self.tick)
+    
     def paddle_ai(self):
         #ai will constantly try to center the paddle on the ball. add or subtract constants.BALL_HEIGHT to prevent the ai from "flickering"
         paddle_center = (self.ai_paddle.y + constants.PADDLE_HEIGHT/2)
