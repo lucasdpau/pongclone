@@ -47,6 +47,12 @@ class Game:
         self.ball.y = constants.GAME_WINDOW_HEIGHT/2
         self.ball.dx = constants.BALL_SPEED * random.choice((-1,1))
         self.ball.dy = constants.BALL_SPEED * random.choice((-1,1))
+    
+    def ball_collision(self):
+        #split the paddle into 8 slices. if the ball hits the 'middle' slices it bounces like it hit a mirror. if it hits the 'edge' slices,
+        #it bounces at a more shallow angle.
+        self.ball.dx *= -1
+        self.ball.dy *= -1      
         
     def update_score(self):
         renderer.surfaces.left_score = renderer.surfaces.create_score(self.score[0])
@@ -61,6 +67,14 @@ class Game:
             self.winner =  "player"
         elif self.score[1] > constants.SCORE_LIMIT:
             self.winner = "ai"
+            
+    def paddle_ai(self):
+        #ai will constantly try to center the paddle on the ball.
+        paddle_center = (self.ai_paddle.y + constants.PADDLE_HEIGHT/2)
+        if self.ball.y > paddle_center:
+            self.ai_paddle.move(0, constants.PADDLE_SPEED)
+        elif self.ball.y < paddle_center:
+            self.ai_paddle.move(0, -constants.PADDLE_SPEED)
     
     def main_loop(self):
         while self.loop:
@@ -77,8 +91,7 @@ class Game:
                     if confirm:
                         self.game_state = "GAMEPLAY"
                         self.reset_ball()
-                        print("TETAT")      
-                        
+
                 elif event.type == pygame.KEYDOWN and self.game_state == "GAMEPLAY":
                     action = handle_keys(event.key)
                     movement = action.get("movement")
@@ -92,10 +105,13 @@ class Game:
                         if self.player_paddle.y + constants.PADDLE_HEIGHT < constants.GAME_WINDOW_HEIGHT:
                             self.player_paddle.move(0, constants.PADDLE_SPEED)
                         else:
-                            self.player_paddle.y = constants.GAME_WINDOW_HEIGHT - constants.PADDLE_HEIGHT
+                            self.player_paddle.y = constants.GAME_WINDOW_HEIGHT - constants.PADDLE_HEIGHT          
             
-            #ball logic
+            #game logic
             if self.game_state == "GAMEPLAY":
+                #ai paddle logic
+                self.paddle_ai()
+                
                 #ball movement
                 self.ball.x += self.ball.dx
                 self.ball.y += self.ball.dy
@@ -109,8 +125,7 @@ class Game:
                     #ball encounters player paddle x coordinate
                     if self.ball.x <= self.player_paddle.x:
                         if (self.ball.y + constants.BALL_HEIGHT) > self.player_paddle.y and self.ball.y < (self.player_paddle.y + constants.PADDLE_HEIGHT):
-                            self.ball.dx *= -1
-                            self.ball.dy *= -1
+                            self.ball_collision()
                         else:
                             self.reset_ball()
                             self.increment_score(1)
@@ -119,8 +134,7 @@ class Game:
                     #ball encounters ai paddle x coordinate
                     if (self.ball.x + constants.BALL_WIDTH) >= (self.ai_paddle.x + constants.PADDLE_WIDTH):
                         if (self.ball.y + constants.BALL_HEIGHT) > self.ai_paddle.y and self.ball.y < (self.ai_paddle.y + constants.PADDLE_HEIGHT):
-                            self.ball.dx *= -1
-                            self.ball.dy *= -1
+                            self.ball_collision()
                         else:
                             self.reset_ball()
                             self.increment_score(0)
@@ -152,6 +166,11 @@ class Game:
                 renderer.render_object(renderer.surfaces.ball, (self.ball.x, self.ball.y))
             elif self.game_state == "MENU":
                 renderer.render_object(renderer.surfaces.main_menu, (0,0))
+                
+            elif self.game_state == "OPTIONS":
+                pass
+            elif self.game_state == "EXIT_PROMPT":
+                pass
                 
             pygame.display.update()
             self.clock.tick(self.tick)
