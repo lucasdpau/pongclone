@@ -145,7 +145,7 @@ class Game:
                 self.ball.move(self.ball.dx, self.ball.dy)
                 
                 #wall collision
-                if self.ball.y <= 0 or self.ball.y >= constants.GAME_WINDOW_HEIGHT:
+                if self.ball.y <= 0 or (self.ball.y + constants.BALL_HEIGHT) >= constants.GAME_WINDOW_HEIGHT:
                     self.ball.dy *= -1
                 
                 #paddle collision
