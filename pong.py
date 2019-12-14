@@ -25,6 +25,7 @@ class Entity:
         self.prev_y = 0
         self.dx = 0
         self.dy = 0
+        self.move_state = 0
     
     def move(self, dx, dy):
         self.prev_x = self.x
@@ -88,7 +89,9 @@ class Game:
     
     def reset_paddles(self):
         self.left_paddle.y = constants.GAME_WINDOW_HEIGHT/2
+        self.left_paddle.move_state = 0
         self.right_paddle.y = constants.GAME_WINDOW_HEIGHT/2
+        self.right_paddle.move_state = 0
         
     def update_score(self):
         renderer.surfaces.left_score = renderer.surfaces.create_score(self.score[0])
@@ -135,31 +138,53 @@ class Game:
                     escape = action.get("escape")
                     #paddle movement, with constraints
                     if left_paddle_movement == "up":
-                        self.left_paddle.move(0, -constants.PADDLE_SPEED)
-                        if self.left_paddle.y < 0:
-                            self.left_paddle.y = 0
+                        self.left_paddle.move_state = "up"
                     if left_paddle_movement == "down":
-                        self.left_paddle.move(0, constants.PADDLE_SPEED)
-                        if self.left_paddle.y + constants.PADDLE_HEIGHT > constants.GAME_WINDOW_HEIGHT:
-                            self.left_paddle.y = constants.GAME_WINDOW_HEIGHT - constants.PADDLE_HEIGHT
-                    
+                        self.left_paddle.move_state = "down"
+  
                     if self.players == 2:
                         if right_paddle_movement == "up":
-                            self.right_paddle.move(0, -constants.PADDLE_SPEED)
-                            if self.right_paddle.y < 0:
-                                self.right_paddle.y = 0
+                            self.right_paddle.move_state = "up"
                         if right_paddle_movement == "down":
-                            self.right_paddle.move(0, constants.PADDLE_SPEED)
-                            if self.right_paddle.y + constants.PADDLE_HEIGHT > constants.GAME_WINDOW_HEIGHT:
-                                self.right_paddle.y = constants.GAME_WINDOW_HEIGHT - constants.PADDLE_HEIGHT
-            
+                            self.right_paddle.move_state = "down"
+                
+                elif event.type == pygame.KEYUP and self.game_state == constants.GAMESTATE_GAMEPLAY:
+                    action = handle_keys(event.key)
+                    right_paddle_movement = action.get("movement_R")
+                    left_paddle_movement = action.get("movement_L")
+                    if left_paddle_movement:
+                        self.left_paddle.move_state = 0                    
+                    if right_paddle_movement:
+                        self.right_paddle.move_state = 0
+                        
             #game logic
             if self.game_state == constants.GAMESTATE_GAMEPLAY:
+
+                if self.left_paddle.move_state == "up":
+                    self.left_paddle.move(0, -constants.PADDLE_SPEED)
+                    if self.left_paddle.y < 0:
+                        self.left_paddle.y = 0
+                   
+                elif self.left_paddle.move_state == "down":
+                    self.left_paddle.move(0, constants.PADDLE_SPEED)
+                    if self.left_paddle.y + constants.PADDLE_HEIGHT > constants.GAME_WINDOW_HEIGHT:
+                        self.left_paddle.y = constants.GAME_WINDOW_HEIGHT - constants.PADDLE_HEIGHT 
                 
-                if self.players == 1:
+                if self.players == 2:
+                    if self.right_paddle.move_state == "up":
+                        self.right_paddle.move(0, -constants.PADDLE_SPEED)
+                        if self.right_paddle.y < 0:
+                            self.right_paddle.y = 0
+                    elif self.right_paddle.move_state == "down":
+                        self.right_paddle.move(0, constants.PADDLE_SPEED)
+                        if self.right_paddle.y + constants.PADDLE_HEIGHT > constants.GAME_WINDOW_HEIGHT:
+                            self.right_paddle.y = constants.GAME_WINDOW_HEIGHT - constants.PADDLE_HEIGHT                
+                        
+                        
+                elif self.players == 1:
                     #ai paddle logic
                     self.right_paddle.paddle_ai(self.ball)
-                
+                                
                 #ball movement
                 self.ball.move(self.ball.dx, self.ball.dy)
                 
