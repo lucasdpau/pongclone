@@ -16,13 +16,17 @@ class Entity:
     def __init__(self, name, x, y):
         self.name = name
         self.x = x
+        self.prev_x = 0
         self.y = y
+        self.prev_y = 0
         self.dx = 0
         self.dy = 0
     
-    def move(self, x, y):
-        self.x += x
-        self.y += y
+    def move(self, dx, dy):
+        self.prev_x = self.x
+        self.x += dx
+        self.prev_y = self.y
+        self.y += dy
         
     def reset_ball(self):
         self.speed = constants.BALL_SPEED
@@ -101,7 +105,7 @@ class Game:
         while counter < 180:
             counter += 1
             print("LOSER!")
-            self.clock.tick(self.tick)          
+            self.clock.tick(self.tick)       
     
     def main_loop(self):
         while self.loop:
@@ -148,21 +152,21 @@ class Game:
                 
                 #paddle collision
                 if self.ball.dx < 0:
-                    #ball encounters player paddle x coordinate
-                    if self.ball.x <= self.player_paddle.x:
-                        if (self.ball.y + constants.BALL_HEIGHT) >= self.player_paddle.y and self.ball.y <= (self.player_paddle.y + constants.PADDLE_HEIGHT):
+                    #ball encounters left paddle x coordinate
+                    if self.ball.x <= self.player_paddle.x + constants.PADDLE_WIDTH:
+                        if (self.ball.y + constants.BALL_HEIGHT) >= self.player_paddle.y and self.ball.y <= (self.player_paddle.y + constants.PADDLE_HEIGHT) and self.ball.prev_x >= (self.player_paddle.x + constants.PADDLE_WIDTH) > self.ball.x:
                             self.ball.ball_collision(self.player_paddle)
-                        else:
+                        elif self.ball.x <= 0:
                             self.ball.reset_ball()
                             self.reset_paddles()
                             self.increment_score(1)
                             self.check_winner()
                 else:
-                    #ball encounters ai paddle x coordinate
-                    if (self.ball.x + constants.BALL_WIDTH) >= (self.ai_paddle.x + constants.PADDLE_WIDTH):
-                        if (self.ball.y + constants.BALL_HEIGHT) >= self.ai_paddle.y and self.ball.y <= (self.ai_paddle.y + constants.PADDLE_HEIGHT):
+                    #ball encounters right paddle x coordinate
+                    if (self.ball.x + constants.BALL_WIDTH) >= self.ai_paddle.x:
+                        if (self.ball.y + constants.BALL_HEIGHT) >= self.ai_paddle.y and self.ball.y <= (self.ai_paddle.y + constants.PADDLE_HEIGHT) and self.ball.prev_x <= self.ai_paddle.x <= self.ball.x:
                             self.ball.ball_collision(self.ai_paddle)
-                        else:
+                        elif self.ball.x >= constants.GAME_WINDOW_WIDTH:
                             self.ball.reset_ball()
                             self.reset_paddles()
                             self.increment_score(0)
