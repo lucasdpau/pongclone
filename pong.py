@@ -73,8 +73,8 @@ class Game:
         self.clock = pygame.time.Clock()
         self.game_state = constants.GAMESTATE_MENU
         pygame.key.set_repeat(int(1000/self.tick))
-        self.player_paddle = Entity("player", 50, constants.GAME_WINDOW_HEIGHT/2)
-        self.ai_paddle = Entity("ai", constants.GAME_WINDOW_WIDTH - 50, constants.GAME_WINDOW_HEIGHT/2)
+        self.left_paddle = Entity("player", 50, constants.GAME_WINDOW_HEIGHT/2)
+        self.right_paddle = Entity("ai", constants.GAME_WINDOW_WIDTH - 50, constants.GAME_WINDOW_HEIGHT/2)
         self.ball = Entity("ball", constants.GAME_WINDOW_WIDTH/2, constants.GAME_WINDOW_HEIGHT/2)
         #ball starts off going either left or right, randomly
         self.ball.reset_ball()
@@ -82,8 +82,8 @@ class Game:
         self.winner = None
     
     def reset_paddles(self):
-        self.player_paddle.y = constants.GAME_WINDOW_HEIGHT/2
-        self.ai_paddle.y = constants.GAME_WINDOW_HEIGHT/2
+        self.left_paddle.y = constants.GAME_WINDOW_HEIGHT/2
+        self.right_paddle.y = constants.GAME_WINDOW_HEIGHT/2
         
     def update_score(self):
         renderer.surfaces.left_score = renderer.surfaces.create_score(self.score[0])
@@ -95,9 +95,9 @@ class Game:
         
     def check_winner(self):
         if self.score[0] > constants.SCORE_LIMIT:
-            self.winner =  "player"
+            self.winner =  "left"
         elif self.score[1] > constants.SCORE_LIMIT:
-            self.winner = "ai"
+            self.winner = "right"
             
     def win_lose(self):
         #pops up a screen for 3 seconds
@@ -128,20 +128,20 @@ class Game:
                     movement = action.get("movement")
                     #paddle movement, with constraints
                     if movement == "up":
-                        if self.player_paddle.y > 0:
-                            self.player_paddle.move(0, -constants.PADDLE_SPEED)
+                        if self.left_paddle.y > 0:
+                            self.left_paddle.move(0, -constants.PADDLE_SPEED)
                         else:
-                            self.player_paddle.y = 0
+                            self.left_paddle.y = 0
                     if movement == "down":
-                        if self.player_paddle.y + constants.PADDLE_HEIGHT < constants.GAME_WINDOW_HEIGHT:
-                            self.player_paddle.move(0, constants.PADDLE_SPEED)
+                        if self.left_paddle.y + constants.PADDLE_HEIGHT < constants.GAME_WINDOW_HEIGHT:
+                            self.left_paddle.move(0, constants.PADDLE_SPEED)
                         else:
-                            self.player_paddle.y = constants.GAME_WINDOW_HEIGHT - constants.PADDLE_HEIGHT          
+                            self.left_paddle.y = constants.GAME_WINDOW_HEIGHT - constants.PADDLE_HEIGHT          
             
             #game logic
             if self.game_state == constants.GAMESTATE_GAMEPLAY:
                 #ai paddle logic
-                self.ai_paddle.paddle_ai(self.ball)
+                self.right_paddle.paddle_ai(self.ball)
                 
                 #ball movement
                 self.ball.move(self.ball.dx, self.ball.dy)
@@ -153,9 +153,10 @@ class Game:
                 #paddle collision
                 if self.ball.dx < 0:
                     #ball encounters left paddle x coordinate
-                    if self.ball.x <= self.player_paddle.x + constants.PADDLE_WIDTH:
-                        if (self.ball.y + constants.BALL_HEIGHT) >= self.player_paddle.y and self.ball.y <= (self.player_paddle.y + constants.PADDLE_HEIGHT) and self.ball.prev_x >= (self.player_paddle.x + constants.PADDLE_WIDTH) > self.ball.x:
-                            self.ball.ball_collision(self.player_paddle)
+                    if self.ball.x <= self.left_paddle.x + constants.PADDLE_WIDTH:
+                        #if the ball is too fast it can go past the paddle in between frames. so we keep track of the balls previous x coordinate and see if the paddle is between the current and previous ball x
+                        if (self.ball.y + constants.BALL_HEIGHT) >= self.left_paddle.y and self.ball.y <= (self.left_paddle.y + constants.PADDLE_HEIGHT) and self.ball.prev_x >= (self.left_paddle.x + constants.PADDLE_WIDTH) > self.ball.x:
+                            self.ball.ball_collision(self.left_paddle)
                         elif self.ball.x <= 0:
                             self.ball.reset_ball()
                             self.reset_paddles()
@@ -163,9 +164,9 @@ class Game:
                             self.check_winner()
                 else:
                     #ball encounters right paddle x coordinate
-                    if (self.ball.x + constants.BALL_WIDTH) >= self.ai_paddle.x:
-                        if (self.ball.y + constants.BALL_HEIGHT) >= self.ai_paddle.y and self.ball.y <= (self.ai_paddle.y + constants.PADDLE_HEIGHT) and self.ball.prev_x <= self.ai_paddle.x <= self.ball.x:
-                            self.ball.ball_collision(self.ai_paddle)
+                    if (self.ball.x + constants.BALL_WIDTH) >= self.right_paddle.x:
+                        if (self.ball.y + constants.BALL_HEIGHT) >= self.right_paddle.y and self.ball.y <= (self.right_paddle.y + constants.PADDLE_HEIGHT) and self.ball.prev_x <= self.right_paddle.x <= self.ball.x:
+                            self.ball.ball_collision(self.right_paddle)
                         elif self.ball.x >= constants.GAME_WINDOW_WIDTH:
                             self.ball.reset_ball()
                             self.reset_paddles()
@@ -174,9 +175,9 @@ class Game:
                 
                 #if there's a winner, go back to main menu and reset score for the next game.
                 if not self.winner == None:
-                    if self.winner == "player":
+                    if self.winner == "left":
                         self.game_state = constants.GAMESTATE_MENU
-                    elif self.winner == "ai":
+                    elif self.winner == "right":
                         self.game_state = constants.GAMESTATE_MENU  
                     self.winner = None
                     self.score = [0,0]
@@ -191,9 +192,9 @@ class Game:
                 renderer.render_object(renderer.surfaces.left_score, (constants.SCORE_X_L, constants.SCORE_Y))
                 renderer.render_object(renderer.surfaces.right_score, (constants.SCORE_X_R, constants.SCORE_Y))
                 #draw the player
-                renderer.render_object(renderer.surfaces.player_paddle, (self.player_paddle.x, self.player_paddle.y))
+                renderer.render_object(renderer.surfaces.left_paddle, (self.left_paddle.x, self.left_paddle.y))
                 #draw the ai
-                renderer.render_object(renderer.surfaces.ai_paddle, (self.ai_paddle.x, self.ai_paddle.y))
+                renderer.render_object(renderer.surfaces.right_paddle, (self.right_paddle.x, self.right_paddle.y))
                 #draw the ball
                 renderer.render_object(renderer.surfaces.ball, (self.ball.x, self.ball.y))
             elif self.game_state == constants.GAMESTATE_MENU:
