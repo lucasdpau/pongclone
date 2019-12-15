@@ -191,6 +191,7 @@ class Game:
                 #wall collision
                 if self.ball.y <= 0 or (self.ball.y + constants.BALL_HEIGHT) >= constants.GAME_WINDOW_HEIGHT:
                     self.ball.dy *= -1
+                    #BUG ball can get stuck changing directions if it goes too far past the wall
                 
                 #paddle collision
                 if self.ball.dx < 0:
