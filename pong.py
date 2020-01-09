@@ -85,7 +85,7 @@ class Game:
         self.ball.reset_ball()
         self.score = [0,0]
         self.winner = None
-        self.players = 2
+        self.players = 1 #set to 2 for multiplayer, set to 1 for AI play
     
     def reset_paddles(self):
         self.left_paddle.y = constants.GAME_WINDOW_HEIGHT/2
@@ -121,6 +121,14 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.loop = False
+                
+                elif event.type == pygame.KEYDOWN and self.game_state == constants.GAMESTATE_OPTIONS:
+                    action = handle_keys(event.key)
+                    escape, confirm = action.get("escape"), action.get("confirm")
+                    if escape:
+                        self.game_state = constants.GAMESTATE_MENU
+                    if confirm:
+                        pass
                     
                 elif event.type == pygame.KEYDOWN and self.game_state == constants.GAMESTATE_MENU:
                     action = handle_keys(event.key)
@@ -198,7 +206,7 @@ class Game:
                     #ball encounters left paddle x coordinate
                     if self.ball.x <= self.left_paddle.x + constants.PADDLE_WIDTH:
                         #if the ball is too fast it can go past the paddle in between frames. so we keep track of the balls previous x coordinate and see if the paddle is between the current and previous ball x
-                        if (self.ball.y + constants.BALL_HEIGHT) >= self.left_paddle.y and self.ball.y <= (self.left_paddle.y + constants.PADDLE_HEIGHT) and self.ball.prev_x >= (self.left_paddle.x + constants.PADDLE_WIDTH) > self.ball.x:
+                        if (self.ball.y + constants.BALL_HEIGHT) >= self.left_paddle.y and self.ball.y <= (self.left_paddle.y + constants.PADDLE_HEIGHT) and self.ball.prev_x >= (self.left_paddle.x + constants.PADDLE_WIDTH) >= self.ball.x:
                             self.ball.ball_collision(self.left_paddle)
                         elif self.ball.x <= 0:
                             self.ball.reset_ball()
@@ -244,7 +252,8 @@ class Game:
                 renderer.render_object(renderer.surfaces.main_menu, (0,0))
                 
             elif self.game_state == constants.GAMESTATE_OPTIONS:
-                pass
+                renderer.render_object(renderer.surfaces.options_menu, (0,0))
+                
             elif self.game_state == constants.GAMESTATE_EXIT_PROMPT:
                 pass
                 

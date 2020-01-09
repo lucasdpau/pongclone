@@ -11,6 +11,7 @@ class GameSurfaces:
         self.right_score = self.create_score(0)
         self.midline = self.create_midline()
         self.main_menu = self.create_main_menu()
+        self.options_menu = self.create_options_menu()
         
     def create_ball(self):
         ball = pygame.Surface((constants.BALL_WIDTH, constants.BALL_HEIGHT))
@@ -40,7 +41,12 @@ class GameSurfaces:
         menu_surface.blit(menu_prompt, (200, constants.GAME_WINDOW_HEIGHT/2))
         
         return menu_surface
-
+    
+    def create_options_menu(self):
+        menu_surface = pygame.Surface((constants.GAME_WINDOW_WIDTH, constants.GAME_WINDOW_HEIGHT))
+        
+        return menu_surface
+    
 class Renderer:
     def __init__(self, main_surface):
         self.surfaces = GameSurfaces()
